@@ -2,6 +2,42 @@ library(stats4)
 library(clusterPower)
 library(expm)
 
+setwd("~/Documents/UWashington/courses/stat 572")
+data<-read.csv("bosdata.csv")
+str(data)
+data<-data[,-5]
+dat<-split(data,data$PTNUM)
+
+print(length(dat))#nof patients
+
+s=0;for(pat in 1:364){
+  if(nrow(dat[[pat]])==1)
+  {s=s+1}
+}
+print(s)#nof patients with 1 observation
+
+the.data<-list()
+cov.data<-matrix(nrow=364,ncol=2)
+for(i in 1:length(dat))
+{
+  if(dat[[i]]$state[length(dat[[i]]$state)]==99)
+  {
+    dat[[i]]<-dat[[i]][-length(dat[[i]]$state),];
+  }
+}
+for(i in 1:length(dat))
+{
+  the.data[[i]]<-matrix(ncol=2,nrow=nrow(dat[[i]]));
+  colnames(the.data[[i]])=c("obsdata","obstimes")
+  the.data[[i]]<-data.frame(the.data[[i]])
+  
+  the.data[[i]]$obsdata<-dat[[i]]$state;
+  the.data[[i]]$obstimes<-dat[[i]]$time;
+  cov.data[i,]<-as.numeric(dat[[i]][1,c(1,4)])
+}
+colnames(cov.data)<-c("PTNUM","X")
+rownames(cov.data)<-1:364
+
 logit<-function(p){
   log(p/(1-p))
 }
@@ -66,3 +102,19 @@ minuslogL<-function(e12_0,e12_DL,e21,tau1,tau2,mu12,mu13,mu15,mu31,mu34,mu35,pi_
   totminuslogL=-sum(logL)
   return(totminuslogL)
 }
+
+e12_0=0.018
+e12_DL=0.058
+e21=0.011
+tau1=0.3623437
+tau2=0.2544685
+mu12=0.3870182
+mu13=0.3897474
+mu15=0.01201972
+mu31=0.06266244
+mu34=3.117166
+mu35=0.7275771
+pi_0=0.061
+pi_DL=-0.018
+
+print(minuslogL(e12_0,e12_DL,e21,tau1,tau2,mu12,mu13,mu15,mu31,mu34,mu35,pi_0,pi_DL))
