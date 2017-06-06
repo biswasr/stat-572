@@ -8,16 +8,16 @@ str(data)
 data<-data[,-5]
 dat<-split(data,data$PTNUM)
 
-print(length(dat))#nof patients
+N=(length(dat))#nof patients
 
-s=0;for(pat in 1:364){
+s=0;for(pat in 1:N){
   if(nrow(dat[[pat]])==1)
   {s=s+1}
 }
 print(s)#nof patients with 1 observation
 
 the.data<-list()
-cov.data<-matrix(nrow=364,ncol=2)
+cov.data<-matrix(nrow=N,ncol=2)
 for(i in 1:length(dat))
 {
   if(dat[[i]]$state[length(dat[[i]]$state)]==99)
@@ -36,7 +36,7 @@ for(i in 1:length(dat))
   cov.data[i,]<-as.numeric(dat[[i]][1,c(1,4)])
 }
 colnames(cov.data)<-c("PTNUM","X")
-rownames(cov.data)<-1:364
+rownames(cov.data)<-1:N
 
 logit<-function(p){
   log(p/(1-p))
@@ -60,8 +60,8 @@ minuslogL<-function(e12_HL,e12_DL,e21,tau1,tau2,mu12,mu13,mu15,mu31,mu34,mu35,pi
                c(mu41,0,0,-(mu41+mu45),mu45),
                c(0,0,0,0,0));
   Ltemp=list();
-  logL=numeric(364);
-  for(pat in 1:364)
+  logL=numeric(N);
+  for(pat in 1:N)
   {
     e12=expit(logit(e12_0)+e12_DL*as.numeric(cov.data[pat,2]==4))
     emissionstates<-rbind(c(1-e12,e12,0),c(e21,1-e21,0),c(0,0,1));
@@ -174,8 +174,8 @@ minuslogLhmm<-function(e12_HL,e12_DL,e21,mu12,mu13,mu21,mu23,pi_HL,pi_DL)
                c(mu21,-(mu21+mu23),mu23),
                c(0,0,0));
   Ltemp=list();
-  logL=numeric(364);
-  for(pat in 1:364)
+  logL=numeric(N);
+  for(pat in 1:N)
   {
     e12=expit(e12_0+nu12*as.numeric(cov.data[pat,2]==4))
     emissionstates<-rbind(c(1-e12,e12,0),c(e21,1-e21,0),c(0,0,1));
@@ -356,8 +356,8 @@ for(i in 1:length(t))
   dcprobmat15_dpar[k]=integrate(f1,lower=0,upper=t[i])$value
   }
   var_cprobdeathGhealthy[i]=t(c(0, 0, 0, dcprobmat15_dpar[7], dcprobmat15_dpar[8],dcprobmat15_dpar[1:6],0,0))%*%mleout2@vcov%*%c(0,0,0,dcprobmat15_dpar[7],dcprobmat15_dpar[8],dcprobmat15_dpar[1:6],0,0);
-  leftCI_cprobdeathGhealthy[i]=cprobdeathGhealthy[i]-0.0096*sqrt(var_cprobdeathGhealthy[i]);
-  rightCI_cprobdeathGhealthy[i]=cprobdeathGhealthy[i]+0.0096*sqrt(var_cprobdeathGhealthy[i]);
+  leftCI_cprobdeathGhealthy[i]=cprobdeathGhealthy[i]-1.96*sqrt(var_cprobdeathGhealthy[i]);
+  rightCI_cprobdeathGhealthy[i]=cprobdeathGhealthy[i]+1.96*sqrt(var_cprobdeathGhealthy[i]);
   
   dendeathGhealthy[i]=denmat[1,5]
   hazarddeathGhealthy[i]=dendeathGhealthy[i]/(1-cprobdeathGhealthy[i])
@@ -370,8 +370,8 @@ for(i in 1:length(t))
     dhazarddeathmat15_dpar[k]=((1-cprobdeathGhealthy[i])*(cprobmat%*%B[[k]])[1,5]+dendeathGhealthy[i]%*%dcprobmat15_dpar[k])/(1-cprobdeathGhealthy[i])^2
   }
   var_hazarddeathGhealthy[i]=t(c(0,0,0,dhazarddeathmat15_dpar[7],dhazarddeathmat15_dpar[8],dhazarddeathmat15_dpar[1:6],0,0))%*%mleout2@vcov%*%c(0,0,0,dhazarddeathmat15_dpar[7],dhazarddeathmat15_dpar[8],dhazarddeathmat15_dpar[1:6],0,0);
-  leftCI_hazarddeathGhealthy[i]=hazarddeathGhealthy[i]-0.0096*sqrt(var_hazarddeathGhealthy[i]);
-  rightCI_hazarddeathGhealthy[i]=hazarddeathGhealthy[i]+0.0096*sqrt(var_hazarddeathGhealthy[i]);
+  leftCI_hazarddeathGhealthy[i]=hazarddeathGhealthy[i]-1.96*sqrt(var_hazarddeathGhealthy[i]);
+  rightCI_hazarddeathGhealthy[i]=hazarddeathGhealthy[i]+1.96*sqrt(var_hazarddeathGhealthy[i]);
   
   
   cprobdeathGbos[i]=cprobmat[3,5];
@@ -384,8 +384,8 @@ for(i in 1:length(t))
     dcprobmat35dgb_dpar[k]=integrate(f1,lower=0,upper=t[i])$value
   }
   var_cprobdeathGbos[i]=t(c(0, 0, 0, dcprobmat35dgb_dpar[7], dcprobmat35dgb_dpar[8],dcprobmat35dgb_dpar[1:6],0,0))%*%mleout2@vcov%*%c(0,0,0,dcprobmat35dgb_dpar[7],dcprobmat35dgb_dpar[8],dcprobmat35dgb_dpar[1:6],0,0);
-  leftCI_cprobdeathGbos[i]=cprobdeathGbos[i]-0.0096*sqrt(var_cprobdeathGbos[i]);
-  rightCI_cprobdeathGbos[i]=cprobdeathGbos[i]+0.0096*sqrt(var_cprobdeathGbos[i]);
+  leftCI_cprobdeathGbos[i]=cprobdeathGbos[i]-1.96*sqrt(var_cprobdeathGbos[i]);
+  rightCI_cprobdeathGbos[i]=cprobdeathGbos[i]+1.96*sqrt(var_cprobdeathGbos[i]);
   
   hazarddeathGbos[i]=denddeathGbos[i]/(1-cprobdeathGbos[i])
   dhazarddeathmat35_dpar<-numeric(length=8)
@@ -394,8 +394,8 @@ for(i in 1:length(t))
     dhazarddeathmat35_dpar[k]=((1-cprobdeathGbos[i])*(cprobmat%*%B[[k]])[3,5]+dendeathGbos[i]%*%dcprobmat35dgb_dpar[k])/(1-cprobdeathGbos[i])^2
   }
   var_hazarddeathGbos[i]=t(c(0,0,0,dhazarddeathmat35_dpar[7],dhazarddeathmat35_dpar[8],dhazarddeathmat35_dpar[1:6],0,0))%*%mleout2@vcov%*%c(0,0,0,dhazarddeathmat35_dpar[7],dhazarddeathmat35_dpar[8],dhazarddeathmat35_dpar[1:6],0,0);
-  leftCI_hazarddeathGbos[i]=hazarddeathGbos[i]-0.0096*sqrt(var_hazarddeathGbos[i]);
-  rightCI_hazarddeathGbos[i]=hazarddeathGbos[i]+0.0096*sqrt(var_hazarddeathGbos[i]);
+  leftCI_hazarddeathGbos[i]=hazarddeathGbos[i]-1.96*sqrt(var_hazarddeathGbos[i]);
+  rightCI_hazarddeathGbos[i]=hazarddeathGbos[i]+1.96*sqrt(var_hazarddeathGbos[i]);
   
   #den2<-expm(Lambdahat2[3:5,3:5]) %*%Lambdahat[,1:2];
   #denoncebosGhealthy=den2[3,2];
@@ -411,8 +411,8 @@ for(i in 1:length(t))
   }
     #dcprobmat13_dpar[k]=integrate(function(tau){(expm(Lambdahat2 * tau)%*%C[[k]]%*%expm(Lambdahat2 * (t[i]-tau)))[1,5]},lower=0,upper=t[i])
   var_cprobbosGhealthy[i]=t(c(0,0,0,dcprobmat13_dpar[7],dcprobmat13_dpar[8],dcprobmat13_dpar[1:6],0,0))%*%mleout2@vcov%*%c(0,0,0,dcprobmat13_dpar[7],dcprobmat13_dpar[8],dcprobmat13_dpar[1:6],0,0);
-  leftCI_cprobbosGhealthy[i]=cprobbosGhealthy[i]-0.0096*sqrt(var_cprobbosGhealthy[i]);
-  righttCI_cprobbosGhealthy[i]=cprobbosGhealthy[i]+0.0096*sqrt(var_cprobbosGhealthy[i]);
+  leftCI_cprobbosGhealthy[i]=cprobbosGhealthy[i]-1.96*sqrt(var_cprobbosGhealthy[i]);
+  righttCI_cprobbosGhealthy[i]=cprobbosGhealthy[i]+1.96*sqrt(var_cprobbosGhealthy[i]);
   
   denbosGhealthy[i]=denmat2[1,3]
   hazardbosGhealthy[i]=denbosGhealthy[i]/(1-cprobbosGhealthy[i]);
@@ -422,8 +422,8 @@ for(i in 1:length(t))
     dhazardbosmat13_dpar[k]=((1-cprobbosGhealthy[i])*(cprobmat2%*%C[[k]])[1,3]+denbosGhealthy[i]%*%dcprobmat13_dpar[k])/(1-cprobbosGhealthy[i])^2
   }
   var_hazardbosGhealthy[i]=t(c(0,0,0,dhazardbosmat13_dpar[7],dhazardbosmat13_dpar[8],dhazardbosmat13_dpar[1:6],0,0))%*%mleout2@vcov%*%c(0,0,0,dhazardbosmat13_dpar[7],dhazardbosmat13_dpar[8],dhazardbosmat13_dpar[1:6],0,0);
-  leftCI_hazardbosGhealthy[i]=hazardbosGhealthy[i]-0.0096*sqrt(var_hazardbosGhealthy[i]);
-  righttCI_hazardbosGhealthy[i]=hazardbosGhealthy[i]+0.0096*sqrt(var_hazardbosGhealthy[i]);
+  leftCI_hazardbosGhealthy[i]=hazardbosGhealthy[i]-1.96*sqrt(var_hazardbosGhealthy[i]);
+  righttCI_hazardbosGhealthy[i]=hazardbosGhealthy[i]+1.96*sqrt(var_hazardbosGhealthy[i]);
 }
 
 #hazarddeathGbos<-denddeathGbos/cprobdeathGbos
@@ -439,23 +439,23 @@ lines(df$x, df$F, lwd = 2,type="l",col="blue")
 #lines(y=cprobdeathGbos,x=t,type="l",col="blue")
 
 df<-data.frame(x=t, F=cprobbosGhealthy,L=leftCI_cprobbosGhealthy,U=righttCI_cprobbosGhealthy)
-plot(x=df$x,y=df$F,type="l",col="red",xlab="t-t0 years",ylab="Cum. probability of BOS",ylim=c(0,1))
+plot(x=df$x,y=df$F,type="l",col="red",xlab="t-t0 years",ylab="Cum. probability of BOS",ylim=c(0,1),lwd=2)
 polygon(c(df$x,rev(df$x)),c(df$L,rev(df$U)),col = "lightpink", border = FALSE,xlab="t-t0 years",ylab="Cum. probability of death",ylim=c(0,1))
-lines(x=df$x,y=df$F,type="l",col="red",xlab="t-t0 years",ylab="Cum. probability of BOS",ylim=c(0,1))
+lines(x=df$x,y=df$F,type="l",col="red",xlab="t-t0 years",ylab="Cum. probability of BOS",ylim=c(0,1),lwd=2)
 
 df<-data.frame(x=t, F=hazardbosGhealthy,L=leftCI_hazardbosGhealthy,U=righttCI_hazardbosGhealthy)
-plot(y=df$F,x=df$x,type="l",col="red",xlab="t-t0 years",ylab="BOS rate/year",ylim=c(0,1))
+plot(y=df$F,x=df$x,type="l",col="red",xlab="t-t0 years",ylab="BOS rate/year",ylim=c(0,1),lwd=2)
 polygon(c(df$x,rev(df$x)),c(df$L,rev(df$U)),col = "lightpink", border = FALSE,xlab="t-t0 years",ylab="Cum. probability of death",ylim=c(0,1))
-lines(x=df$x,y=df$F,type="l",col="red",xlab="t-t0 years",ylab="Cum. probability of BOS",ylim=c(0,1))
+lines(x=df$x,y=df$F,type="l",col="red",xlab="t-t0 years",ylab="Cum. probability of BOS",ylim=c(0,1),lwd=2)
 
 df<-data.frame(x=t, F=hazarddeathGhealthy,L=leftCI_hazarddeathGhealthy,U=rightCI_hazarddeathGhealthy)
-plot(y=df$F,x=df$x,type="l",col="red",xlab="t-t0 years",ylab="Mortality rate/year",ylim=c(0,1))
+plot(y=df$F,x=df$x,type="l",col="red",xlab="t-t0 years",ylab="Mortality rate/year",ylim=c(0,1),lwd=2)
 polygon(c(df$x,rev(df$x)),c(df$L,rev(df$U)),col = "lightpink", border = FALSE,xlab="t-t0 years",ylab="Cum. probability of death",ylim=c(0,1))
-lines(y=df$F,x=df$x,type="l",col="red",xlab="t-t0 years",ylab="Mortality rate/year")
+lines(y=df$F,x=df$x,type="l",col="red",xlab="t-t0 years",ylab="Mortality rate/year",lwd=2)
 df<-data.frame(x=t, F=hazarddeathGbos,L=leftCI_hazarddeathGbos,U=rightCI_hazarddeathGbos)
-lines(y=df$F,x=df$x,type="l",col="blue",xlab="t-t0 years",ylab="Mortality rate/year",ylim=c(0,0.8))
+lines(y=df$F,x=df$x,type="l",col="blue",xlab="t-t0 years",ylab="Mortality rate/year",ylim=c(0,0.8),lwd=2)
 polygon(c(df$x,rev(df$x)),c(df$L,rev(df$U)),col = "lightskyblue", border = FALSE,xlab="t-t0 years",ylab="Cum. probability of death",ylim=c(0,1))
-lines(y=df$F,x=df$x,type="l",col="blue",xlab="t-t0 years",ylab="Mortality rate/year",ylim=c(0,0.8))
+lines(y=df$F,x=df$x,type="l",col="blue",xlab="t-t0 years",ylab="Mortality rate/year",ylim=c(0,0.8),lwd=2)
 
 
 1-cprobbosGhealthy[500]
@@ -691,7 +691,7 @@ Lambda=rbind(c(-(mu12+mu13+mu15),mu12,mu13,0,mu15),
              c(mu41,0,0,-(mu41+mu45),mu45),
              c(0,0,0,0,0));
 
-logL=numeric(364);
+logL=numeric(N);
   e12=expit(logit(e12_0)+e12_DL*as.numeric(TT==4))
   emissionstates<-rbind(c(1-e12,e12,0),c(e21,1-e21,0),c(0,0,1));
   pi2=expit(logit(pi_0)+pi_DL*as.numeric(TT==4))
@@ -737,7 +737,7 @@ return(L);
                c(mu41,0,0,-(mu41+mu45),mu45),
                c(0,0,0,0,0));
   
-  logL=numeric(364);
+  logL=numeric(N);
   e12=expit(logit(e12_0)+e12_DL*as.numeric(TT==4))
   emissionstates<-rbind(c(1-e12,e12,0),c(e21,1-e21,0),c(0,0,1));
   pi2=expit(logit(pi_0)+pi_DL*as.numeric(TT==4))
