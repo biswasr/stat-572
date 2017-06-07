@@ -131,9 +131,45 @@ mu35=rnorm(1,mean=0,sd=0.25)
 pi_HL=log(0.061)
 pi_DL=log(0.043)
 
+for(i in 1:10)
+{
+  e12_HL1=log(0.018)
+  e12_DL1=log(0.076)
+  e211=log(0.011)
+  tau11=rnorm(1,mean=0,sd=0.25)
+  tau21=rnorm(1,mean=0,sd=0.25)
+  mu121=rnorm(1,mean=0,sd=0.25)
+  mu131=rnorm(1,mean=0,sd=0.25)
+  mu151=rnorm(1,mean=0,sd=0.25)
+  mu11=rnorm(1,mean=0,sd=0.25)
+  mu311=rnorm(1,mean=0,sd=0.25)
+  mu341=rnorm(1,mean=0,sd=0.25)
+  mu351=rnorm(1,mean=0,sd=0.25)
+  pi_HL1=log(0.061)
+  pi_DL1=log(0.043)
+  m1<-minuslogL(e12_HL1,e12_DL1,e211,tau11,tau21,mu121,mu131,mu151,mu311,mu341,mu351,pi_HL1,pi_DL1);
+  e12_HL2=log(0.018)
+  e12_DL2=log(0.076)
+  e212=log(0.011)
+  tau12=rnorm(1,mean=0,sd=0.25)
+  tau22=rnorm(1,mean=0,sd=0.25)
+  mu122=rnorm(1,mean=0,sd=0.25)
+  mu132=rnorm(1,mean=0,sd=0.25)
+  mu152=rnorm(1,mean=0,sd=0.25)
+  mu12=rnorm(1,mean=0,sd=0.25)
+  mu312=rnorm(1,mean=0,sd=0.25)
+  mu342=rnorm(1,mean=0,sd=0.25)
+  mu352=rnorm(1,mean=0,sd=0.25)
+  pi_HL2=log(0.061)
+  pi_DL2=log(0.043)
+  m2<-minuslogL(e12_HL2,e12_DL2,e212,tau12,tau22,mu122,mu132,mu152,mu312,mu342,mu352,pi_HL2,pi_DL2);
+  if(abs(m1-m2)<=5)
+    {break;}
+}
 print(minuslogL(e12_HL,e12_DL,e21,tau1,tau2,mu12,mu13,mu15,mu31,mu34,mu35,pi_HL,pi_DL))
-mleout_sim<-vector(mode="list",length=30)
-for(i in 3:10)
+#mleout_sim<-vector(mode="list",length=30)
+#timetaken<-numeric(length=30)
+for(i in 11:20)
 {
   e12_HL=log(0.018)
   e12_DL=log(0.076)
@@ -142,15 +178,20 @@ for(i in 3:10)
   tau2=rnorm(1,mean=0,sd=0.25)
   mu12=rnorm(1,mean=0,sd=0.25)
   mu13=rnorm(1,mean=0,sd=0.25)
+  mu15=rnorm(1,mean=0,sd=0.25)
   mu1=rnorm(1,mean=0,sd=0.25)
   mu31=rnorm(1,mean=0,sd=0.25)
   mu34=rnorm(1,mean=0,sd=0.25)
   mu35=rnorm(1,mean=0,sd=0.25)
   pi_HL=log(0.061)
   pi_DL=log(0.043)
-  
-  mleout_sim[[i]]<-mle(minuslogl = minuslogL, start=list(e12_HL=e12_HL,e12_DL=e12_DL,e21=e21,tau1=tau1,tau2=tau2,mu12=mu12,mu13=mu13,mu15=mu15,mu31=mu31,mu34=mu34,mu35=mu35,pi_HL=pi_HL,pi_DL=pi_DL),control=list(maxit=2500,reltol=1e-8),method="Nelder-Mead")
+  ptm=proc.time()
+  mleout_sim[[i]]<-mle(minuslogl = minuslogL, start=list(e12_HL=e12_HL,e12_DL=e12_DL,e21=e21,tau1=tau1,tau2=tau2,mu12=mu12,mu13=mu13,mu15=mu15,mu31=mu31,mu34=mu34,mu35=mu35,pi_HL=pi_HL,pi_DL=pi_DL),control=list(maxit=2500,reltol=1e-8),method="BFGS")
+  tmmm<-proc.time()-ptm;
+  timetaken[i]<-tmmm[3];
 }
+perm_mle=c(6,7,8,4,10,9,11,5,3,1,2,12,13)
+
 
 H<-matrix(data=0,nrow=13,ncol=13);
 for(i in 1:13)
@@ -160,10 +201,10 @@ for(i in 1:13)
 covexp<-H%*%(mleout2@vcov)%*%t(H)
 seexp=sqrt(diag(covexp))
 CI<-cbind(exp(mleout2@coef)-1.96*seexp,exp(mleout2@coef)+1.96*seexp)
-CI<-cbind((mleout2@coef)-1.96*sqrt(diag(mleout2@vcov)),(mleout2@coef)+1.96*sqrt(diag(mleout2@vcov)))
-round(exp(CI),2)
+CI<-cbind((mleouttemp@coef)-1.96*sqrt(diag(mleouttemp@vcov)),(mleouttemp@coef)+1.96*sqrt(diag(mleouttemp@vcov)))
+round(exp(CI[perm_mle,]),2)
 
-X='e12_DL'
+X='mu35'
 c(round(exp(mleout2@coef[X]),2),round(exp((mleout2@coef[X])-1.96*sqrt((mleout2@vcov[X,X]))),2),round(exp((mleout2@coef[X])+1.96*sqrt((mleout2@vcov[X,X]))),2))
 c(round(exp(mleout2@coef[X]),2),round((exp(mleout2@coef[X])-1.96*seexp[10]),2),round(exp((mleout2@coef[X]))+1.96*seexp[10],2))
 
@@ -221,6 +262,12 @@ mlehmm<-mle(minuslogl = minuslogLhmm, start=list(e12_HL=log(0.028),e12_DL=log(1.
 CI<-cbind((mlehmm@coef)-1.96*sqrt(diag(mlehmm@vcov)),(mlehmm@coef)+1.96*sqrt(diag(mlehmm@vcov)))
 round(exp(CI),2)
 
+mleobj=mleout2;
+X='e21';
+expit(exp(mleobj@coef[X]))
+sdd<-(mleobj@vcov[X,X])*expit(exp(mleobj@coef[X]))^2 * exp(mleobj@coef[X]-exp(mleobj@coef[X]))
+expit(exp(c(mleobj@coef[X]-1.96*sdd,mleobj@coef[X]+1.96*sdd)))
+
 H2<-matrix(data=0,nrow=9,ncol=9);
 for(i in 1:9)
 {
@@ -248,6 +295,24 @@ pi_DLhat=expit(exp(mleout2@coef['pi_DL']))
 e21hat<-exp(mleout2@coef['e21'])
 e12_HLhat<-exp(mleout2@coef['e12_HL'])
 e12_DLhat<-exp(mleout2@coef['e12_DL'])
+
+#CI_mu23=c(mu23hat-1.96*(seCE_mu23),mu23hat+1.96*(seCE_mu23))
+
+a='mu35';b='tau2';
+vCI_mu45=mleout2@vcov[a,a]+mleout2@vcov[b,b] + 2*mleout2@vcov[a,b];
+seCE_mu45=sqrt(vCI_mu45)
+CI_mu45=c(mleout2@coef[a]+mleout2@coef[b]-1.96*(seCE_mu45),mleout2@coef[a]+mleout2@coef[b]+1.96*(seCE_mu45))
+CI_mu45=round(exp(CI_mu45),2)
+print(CI_mu45)
+round(mu45hat,2)
+
+a='mu35';b='tau2';
+vCI_mu45=mleout2@vcov[a,a]+mleout2@vcov[b,b] + 2*mleout2@vcov[a,b];
+seCE_mu45=sqrt(vCI_mu45)
+CI_mu45=c(mleout2@coef[a]+mleout2@coef[b]-1.96*(seCE_mu45),mleout2@coef[a]+mleout2@coef[b]+1.96*(seCE_mu45))
+CI_mu45=round(exp(CI_mu45),2)
+print(CI_mu45)
+round(mu45hat,2)
 
 # mu12hat=log(mu12hat)
 # mu13hat=log(mu13hat)
@@ -666,7 +731,8 @@ TTval=c(2,4);
                   pp_rs<-sum(AA)
                   expTE2[r,s]<-expTE2[r,s]+pp_rs;}
                 }
-                devTE2[r,s]<-(obsTE2[r,s]-expTE2[r,s])^2/expTE2[r,s]
+                #devTE2[r,s]<-(obsTE2[r,s]-expTE2[r,s])^2/expTE2[r,s]
+                devTE2[r,s]<-obsTE2[r,s]*log(obsTE2[r,s]/expTE2[r,s])
                 }
                 }
                 
